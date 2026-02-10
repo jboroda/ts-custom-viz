@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="./lib/ag-grid-enterprise.min.js"></script>
+    <link rel="stylesheet" href="./lib/styles/ag-grid.css">
+    <link rel="stylesheet" href="./lib/styles/ag-theme-alpine.css">
+    <style>
+        body { margin: 0; padding: 0; }
+        #myPivotGrid { height: 100vh; width: 100vw; }
+    </style>
+</head>
+<body>
+    <div id="myPivotGrid" class="ag-theme-alpine"></div>
+
+    <script>
+        window.addEventListener('message', (event) => {
+            // Safety check: Only accept data from your ThoughtSpot domain
+            // if (event.origin !== "https://your-company.thoughtspot.cloud") return;
+
+            if (event.data.type === 'TS_DATA') {
+                const rowData = event.data.payload;
+                
+                const gridOptions = {
+                    columnDefs: [
+                        { field: "region", rowGroup: true, hide: true },
+                        { field: "branch", rowGroup: true, hide: true },
+                        { field: "group eap", rowGroup: true, hide: true },
+                        { field: "display name", resizable: true },
+                        // Metrics: No aggregation (ValueGetter returns null for groups)
+                        { 
+                            field: "planned capture fees", 
+                            resizable: true,
+                            valueGetter: p => p.node.group ? null : p.data["planned capture fees"] 
+                        },
+                        { 
+                            field: "committed capture fees", 
+                            resizable: true,
+                            valueGetter: p => p.node.group ? null : p.data["committed capture fees"] 
+                        },
+                        { 
+                            field: "remaining opportunity", 
+                            resizable: true,
+                            valueGetter: p => p.node.group ? null : p.data["remaining opportunity"] 
+                        }
+                    ],
+                    defaultColDef: { flex: 1, minWidth: 100, resizable: true, sortable: true },
+                    autoGroupColumnDef: { headerName: 'Hierarchy', minWidth: 300, cellRendererParams: { suppressCount: true } },
+                    rowData: rowData
+                };
+
+                const eGridDiv = document.querySelector('#myPivotGrid');
+                // Clear previous grid if it exists
+                eGridDiv.innerHTML = '';
+                new agGrid.Grid(eGridDiv, gridOptions);
+            }
+        });
+    </script>
+</body>
+</html>
