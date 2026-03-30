@@ -10,6 +10,30 @@
     </style>
 </head>
 <body>
+    <div id="grid" class="ag-theme-alpine"></div>
+
+    <script>
+        window.addEventListener('message', (event) => {
+            // Safety check: Only accept data from your ThoughtSpot domain
+            if (event.origin !== "https://janney.thoughtspot.cloud/") return;
+
+            if (event.data.type === 'TS_DATA') {
+                const rowData = event.data.payload;
+                
+                const gridOptions = {
+                    columnDefs: [],
+                    defaultColDef: { flex: 1, minWidth: 100, resizable: true, sortable: true },
+                    rowData: rowData
+                };
+
+                const eGridDiv = document.querySelector('#grid');
+                // Clear previous grid if it exists
+                eGridDiv.innerHTML = '';
+                new agGrid.Grid(eGridDiv, gridOptions);
+            }
+        });
+    </script>
+    
     <!-- <div id="myPivotGrid" class="ag-theme-alpine"></div> -->
 
     <!-- <script>
